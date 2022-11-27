@@ -1,0 +1,1300 @@
+// google analytics event tracking 
+
+var CKEditor = null;
+var myLazyLoad = null;
+$(document).ready(function () {
+	if ($('.lazy').length > 0) {
+		myLazyLoad = new LazyLoad({
+			elements_selector: ".lazy"
+		});
+	}
+
+	$('a[href*="/tag/"]').innerText = '#' + $('a[href*="/tag/"]').innerText;
+	var anchors = $('a[href*="/tag/"]');
+	$(anchors).each(function (i, a) {
+
+		if (!$(a).data('val')) {
+			$(a).prepend("<span class='text-lighter'>#</span>");
+		}
+	});
+
+
+	/************************ Youtube subscription on mobile nodal */
+/*
+	if (!$.cookie('c-youtube-subscription')) {
+		$('#youtube-subscription-modal').modal({backdrop: 'static', keyboard: false}, 'show');
+	}else {
+		$('#youtube-subscription-modal').modal('hide');
+	}
+*/
+	/*************************************************************** */
+
+});
+
+$(document).delegate('#btnCloseYoutubeBox', 'click', function() {
+	$('#youtube-subscription-modal').modal('hide');
+	$.cookie('c-youtube-subscription', true, {
+		path: '/',
+		expires: 1
+	});
+});
+
+$(document).on('click', '[data-gatrack]', function (e) {
+	gaTrack(this);
+});
+
+function gaTrack(control) {
+
+	var $link = $(control);
+	var commaSeparatedEventData = $link.data('gatrack');
+	var eventParams = commaSeparatedEventData.split(',');
+
+	if (!eventParams) {
+		return;
+	}
+
+	eventCategory = eventParams[0]
+	eventAction = eventParams[1]
+	eventValue = eventParams[2]
+
+	if (typeof ga !== 'undefined' && $.isFunction(ga)) {
+
+		ga('send', {
+			hitType: 'event',
+			eventCategory: eventCategory,
+			eventAction: eventAction,
+			eventLabel: eventValue
+		});
+	}
+}
+
+$(document).delegate('.hamburger', 'click', function (e) {
+	e.preventDefault();
+	$(this).toggleClass('is-active');
+});
+
+$(document).delegate('.btn-search-top', 'click', function (e) {
+	e.preventDefault();
+	$('.top-search-wrap').addClass('active');
+});
+
+$(document).delegate('#top-search-close', 'click', function (e) {
+	e.preventDefault();
+	$('.top-search-wrap').removeClass('active');
+});
+
+
+$('.btn-triger').click(function () {
+	$(this).closest('.float-btn-group').toggleClass('open');
+});
+
+
+// window load 
+
+$(window).load(function () {
+	$(".preloader").delay(100).fadeOut("slow").remove();
+
+	var slideHeight = $(window).height() - 105 - 20;
+	$('#home .carousel-inner .item').css('height', slideHeight);
+
+	$(window).resize(function () {
+		$('#home .carousel-inner .item').css('height', slideHeight);
+	});
+
+	//loadIfValue();
+
+	if ($('.start-letters a').length) {
+		if (startsWith == '') {
+			$('.start-letters').find('a[data-val="all"]').addClass('active');
+		} else {
+
+			$('.start-letters').find('a[data-val="' + startsWith + '"]').addClass('active');
+		}
+	}
+});
+
+
+$(document).ready(function (e) {
+	$('button.btn.speaker').removeClass('disabled');
+	$('[data-toggle="tooltip"]').tooltip();
+});
+
+$(document).delegate('#q', 'keypress', function (e) {
+
+	var code = e.keyCode || e.which;
+	if (code != 13 && $(window).width() >= 767) {
+		//	changeState();
+	}
+});
+
+$(document).delegate('#sendfav', 'click', function (e) {
+
+	var email = $('#subcriptionbox #email').val();
+	if (isValidEmailAddress(email) == true) {
+
+		$.get(baseURL + "/controls/emailAdopter.php?email=" + email, function (data) {
+			$('.email-form').html('<div class="alert alert-success"> <strong> Saved !</strong> Your favorit list sent to your email. Please check your mailbox.</div>');
+		});
+	}
+});
+
+$(document).delegate('#btn-mobile-search', 'click', function (e) {
+	$('.search-bar-mobile').slideToggle('fast');
+});
+
+
+function isValidEmailAddress(emailAddress) {
+	var pattern = /^([a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i;
+	return pattern.test(emailAddress);
+};
+
+
+$('#collapseOne').on('shown.bs.collapse', function () {
+	$('a[data-toggle="collapse"] i').removeClass("fa-share-alt fa-inverse").addClass("fa-close");
+	$('a[data-toggle="collapse"]').removeClass("btn-success").addClass("btn-danger");
+	$('a[data-toggle="collapse"] :last-child').html('  Close Share');
+});
+
+$('#collapseOne').on('hidden.bs.collapse', function () {
+	$('a[data-toggle="collapse"] i').removeClass("fa-close").addClass("fa-share-alt fa-inverse");
+	$('a[data-toggle="collapse"]').removeClass("btn-danger").addClass("btn-success");
+
+	$('a[data-toggle="collapse"] :last-child').html('  Share');
+
+});
+
+
+$('.random a.round').click(function () {
+	getRandom();
+	return false;
+});
+
+
+/*********** Private functions *****************/
+var changeState = function () {
+	var slideHeight = $(window).height();
+
+	$('#home').html('').css({
+		'min-height': slideHeight,
+		'background': '#fff'
+	});
+
+	$('header#navigation  .navbar').addClass('green-bar');
+	$('.navbar-brand img').attr("src", baseURL + '/images/kidpaw_white.png');
+	$('.ui-group-buttons').hide();
+	$('.search-outer').show();
+
+	if ($('.navbar-secondary').length > 0) {
+		$('.navbar-secondary').css('display', 'block');
+	}
+
+	$('.search-outer .top-search').focus();
+}
+
+var loadIfValue = function () {
+
+	var term = $.trim(getParameterByName('q'));
+	if (term != '') {
+		changeState();
+		$('.top-search').val(term);
+		buildResultsPage(term);
+	}
+}
+
+var array = new Array();
+var addFavorite = function (nameid) {
+
+	var cookie_favs = $.cookie('favs');
+	if (cookie_favs) {
+
+		array = cookie_favs.split(',');
+		var found = false;
+		$.each(array, function (key, value) {
+			if (value == nameid) {
+				found = true;
+			}
+		});
+
+
+		if (array.length >= 10)
+			array.slice(0, 9)
+
+		if (found == false) {
+
+			//array.push(nameid);
+			array.unshift(nameid);
+			$.cookie('favs', array.join(','), {
+				expires: 30,
+				path: '/',
+				domain: 'kidpaw.com'
+			});
+		}
+	} else {
+
+		// add first id in cookie
+		$.cookie('favs', nameid, {
+			expires: 30,
+			path: '/',
+			domain: 'kidpaw.com'
+		});
+	}
+
+	return !found;
+}
+
+var recentArray = new Array();
+var addRecentVisited = function (nameid) {
+
+	var cookie_recent = $.cookie('recentvisited');
+
+	if (cookie_recent) {
+
+		recentArray = $.map(cookie_recent.split(','), function (v) {
+
+			return parseInt(v, 10);
+		});
+
+		var found = false;
+
+		//remove name id if already exists in array
+		var index = recentArray.indexOf(nameid);
+
+		if (index > -1) {
+
+			recentArray.splice(index, 1);
+		}
+
+		//recentArray.splice( $.inArray(nameid, recentArray), 1 );
+
+		if (recentArray.length >= 20)
+			recentArray.slice(0, 19)
+
+		recentArray.unshift(nameid);
+		$.cookie('recentvisited', recentArray.join(','), {
+			expires: 30,
+			path: '/',
+			domain: 'kidpaw.com'
+		});
+	} else {
+
+		// add first id in cookie
+		$.cookie('recentvisited', nameid, {
+			expires: 30,
+			path: '/',
+			domain: 'kidpaw.com'
+		});
+	}
+}
+
+var removeFavorite = function (nameid) {
+
+	var cookie_favs = $.cookie('favs');
+	if (cookie_favs) {
+		array = cookie_favs.split(',');
+
+		array = jQuery.grep(array, function (value) {
+			return value != nameid;
+		});
+
+		$.cookie('favs', array.join(','), {
+			expires: 30,
+			path: '/',
+			domain: 'kidpaw.com'
+		});
+	}
+}
+
+
+var checkFavorite = function (nameid) {
+
+	var cookie_favs = $.cookie('favs');
+	if (cookie_favs) {
+
+		var array = cookie_favs.split(',');
+
+		var found = false;
+		$.each(array, function (key, value) {
+
+			var v = parseInt(value, 10);
+			if (v == nameid)
+				found = true;
+		});
+
+		if (found == true) {
+			$('#add-favorite').html(' Added in Favorit   <i class="fa fa-heart"></i>');
+			$('#add-favorite').prop('disabled', true).addClass('btn-disabled');
+		}
+	}
+}
+
+/*****************************************************/
+
+$(document).ready(function () {
+
+	/**if ($('#shareinput').length) {
+		shortenUrl(selfUrl);
+	}
+*/
+	// disable add favorit button.
+	if ($('#add-favorite')) {
+		checkFavorite($('#add-favorite').data('nameid'));
+	}
+
+	// start type ahead here.
+
+	var isTypeaHeadFired = false;
+
+	// Set the Options for "Bloodhound" Engine
+	var engine = new Bloodhound({
+		datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+		queryTokenizer: Bloodhound.tokenizers.whitespace,
+		remote: {
+			url: baseURL + "/controls/searchAdopter.php?t=instant&s=%QUERY",
+
+			replace: function (url, query) {
+
+				return url.replace('%QUERY', query);
+			},
+			filter: function (x) {
+				return $.map(x, function (item) {
+
+					return {
+						id: item.id,
+						value: item.name
+					};
+				});
+			},
+			wildcard: "%QUERY",
+		}
+	}); // end bloodhound
+
+	//Initialize the Suggestion Engine
+	engine.initialize();
+	$('.top-search, .top-search-inner, #name-search-admin').typeahead(
+		{
+			autoselect: true,
+			hint: true,
+			highlight: true,
+			minLength: 2,
+
+		},
+		{
+			limit: 10,
+			name: 'value',
+			displayKey: 'value',
+			source: engine.ttAdapter(),
+			templates: {
+				suggestion: function (e) {
+					var isClickFalse = false;
+					var isAdminNameSearch = document.getElementById('name-search-admin');
+					if (isAdminNameSearch) {
+						isClickFalse = !!isAdminNameSearch.dataset.clickResult
+						if (isClickFalse) {
+							return (`<div data-nameurl="${get_nameurl(e.value)}" data-nameid="${e.id}">${e.value}</div>`);
+
+						} else return ('<div><a href="' + get_nameurl(e.value) + '">' + e.value + '</a></div>');
+					} else {
+						return ('<div><a href="' + get_nameurl(e.value) + '">' + e.value + '</a></div>');
+					}
+				}
+
+			}
+
+		})
+		.on('typeahead:asyncrequest', function () {
+			loadProgress(".tt-input");
+		})
+		.on('typeahead:asynccancel typeahead:asyncreceive', function () {
+			unloadProgress(".tt-input");
+		})
+		.bind('typeahead:select', function (ev, suggestion) {
+			//var term = $(this).val();
+			//buildResultsPage(term);
+			isTypeaHeadFired = true;
+		}); // end bind
+
+
+	$(".top-search").on('keyup', function (e) {
+		if (e.which === 13 || e.keyCode === 13) {
+			if (!isTypeaHeadFired) {
+				var term = $(this).val();
+				$('.top-search').typeahead('close');
+				buildResultsPage(term);
+			}
+
+			isTypeaHeadFired = false;
+		}
+	});
+
+	$(".top-search-inner").on('keyup', function (e) {
+
+		if (e.which === 13 || e.keyCode === 13) {
+			if (!isTypeaHeadFired) {
+				var term = $(this).val();
+
+				window.location.href = get_searchurl(term);
+			}
+
+			isTypeaHeadFired = false;
+		}
+	});
+
+	$(".search-outer .input-group-addon.success").on('click', function (e) {
+
+		var term = $('input.tt-input').val();
+		doTopSearch(term);
+	});
+
+	$("#custom-search-input .input-group-btn, .search-bar-mobile button").on('click', function (e) {
+
+		var term = $('#q').val();
+		doTopSearch(term);
+	});
+
+	$('select.search-type').change(function () {
+
+		var isMobile = $(window).width() <= 767;
+		var prefix = {
+			names: 'Search names',
+			meanings: 'Search meanings',
+		};
+
+		if ($(this).val() == 'names') {
+
+			$('#q, #top-searchq').attr('placeholder', prefix.names);
+
+		} else {
+
+			$('#q, #top-searchq').attr('placeholder', prefix.meanings);
+		}
+
+	});
+
+	$('.mobile-searchbox').keypress(function (e) {
+		if (e.which == 13) {
+
+			var term = $('#q').val();
+			doTopSearch(term);
+		}
+	});
+
+
+	function loadProgress(selector) {
+		$(selector).css({
+			'background-image': 'url("' + baseURL + '/images/input-loading.gif")',
+			'background-position': '2px 50%',
+			'background-repeat': 'no-repeat',
+			'padding-left': '37px',
+			'transition': 'all ease .3s'
+		})
+
+	}
+
+	function unloadProgress(selector) {
+		$(selector).css({
+			'background-image': '',
+			'background-position': '',
+			'background-repeat': '',
+			'padding-left': '10px'
+		});
+
+	}
+
+	function doTopSearch(term) {
+
+		window.location.href = get_searchurl(term);
+	}
+
+	$(document).delegate('.favorite .fa.fa-trash', 'click', function (e) {
+
+		e.preventDefault();
+		$(this).closest('li').next('li').remove();
+		$(this).closest('li').remove();
+		$(this).closest('li').next('.divider').remove();
+
+
+		removeFavorite($(this).data('nameid'));
+
+		if ($('#favlist ul.dropdown-menu li').length == 1)
+			$('#favlist').remove();
+	});
+
+	$("#home-search #q").on('keyup', function (e) {
+
+		if (e.which === 13 || e.keyCode === 13) {
+			var term = $(this).val();
+
+			window.location.href = get_searchurl(term);
+		}
+	});
+
+	$('#add-favorite').click(function () {
+
+		var nameid = $(this).data('nameid');
+		var name = $(this).data('name');
+		var isAdded = addFavorite(nameid);
+		$(this).html('Added <i class="fa fa-heart"></i>');
+
+		// show top menu for favorit
+		if (isAdded == true)
+			buildFavorits(nameid, name);
+		loadQuickPopup();
+		return false;
+	});
+
+	$(document).delegate('#save-favoritelist', 'click', function (e) {
+		e.preventDefault();
+		$('#subcriptionbox').modal('show');
+
+	});
+	$(document).delegate('#btn-savefav-quickpopup', 'click', function (e) {
+		e.preventDefault();
+		$(this).closest('.modal').modal('hide');
+		$('#subcriptionbox').modal('show');
+	});
+
+
+	$('.add-favorite').click(function (e) {
+		e.preventDefault();
+		var nameid = $(this).data('nameid');
+		var name = $(this).data('name');
+		var isAdded = addFavorite(nameid);
+		// show top menu for favorit
+		if (isAdded == true) {
+			$(this).css({
+				'opacity': '0.2'
+			});
+			buildFavorits(nameid, name);
+			loadQuickPopup();
+		}
+
+		return false;
+	});
+
+	$.cookieBar({
+		acceptText: 'Continue',
+		fixed: true,
+		bottom: true,
+	});
+
+	$('select.search-type option').each(function () {
+		if (this.value == getParameterByName('searchin')) {
+			this.selected = 'selected';
+		}
+	});
+
+	// load quick popup modal contents
+	loadQuickPopup();
+	loadAllOrigins();
+}); // document ready
+
+
+/***************************************** URLs Helpers *********************************/
+
+function shortenUrl(url) {
+	$.getJSON(baseURL + "/controls/urlshortner.php?url=" + url, function (data) {
+		if (data) {
+			$('#shareinput, #shorturl').val(data.id);
+
+			// add share urls to social media buttons
+			/*
+			var uri = updateQueryStringParameter($('#facebook-share').attr('href'), 'u', data.id);
+			$('#facebook-share').attr('href', uri);
+
+			uri = updateQueryStringParameter($('#twitter-share').attr('href'), 'url', data.id);		
+			$('#twitter-share').attr('href', uri);
+
+			uri = updateQueryStringParameter($('#google-share').attr('href'), 'url', data.id);		
+			$('#google-share').attr('href', uri);
+			*/
+		}
+	});
+
+}
+
+function decodeUrl(url) {
+	//var u = url.toLowerCase().replace(/[\`\~\!\@\#\$\%\^\&\*\(\)\=\+\[\]\{\}\'\:\;\"\,\<\>\?]/g, '').split(' ').join('-');
+
+	return url.split(' ').join('+');
+}
+
+function stripTrailingSlash(str) {
+	var str = str.toString();
+	if (str.substr(-1) === '/') {
+		return str.substr(0, str.length - 1);
+	}
+	return str;
+}
+
+var getParameterByName = function (name) {
+	name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+		results = regex.exec(location.search.toLowerCase());
+	return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+var updateQueryStringParameter = function (uri, key, value) {
+	var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+	var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+	if (uri.match(re)) {
+		return uri.replace(re, '$1' + key + "=" + value + '$2');
+	} else {
+		return uri + separator + key + "=" + value;
+	}
+}
+
+var hasParameter = function (name) {
+	return getParameterByName(name) != "";
+}
+
+function removeParam(key, sourceURL) {
+	var rtn = sourceURL.split("?")[0],
+		param,
+		params_arr = [],
+		queryString = (sourceURL.indexOf("?") !== -1) ? sourceURL.split("?")[1] : "";
+	if (queryString !== "") {
+		params_arr = queryString.split("&");
+		for (var i = params_arr.length - 1; i >= 0; i -= 1) {
+			param = params_arr[i].split("=")[0];
+			if (param === key) {
+				params_arr.splice(i, 1);
+			}
+		}
+		rtn = rtn + "?" + params_arr.join("&");
+	}
+
+	return rtn;
+}
+
+function get_nameurl(name) {
+	url = baseURL + '/names/' + decodeUrl(name);
+	return url.toLowerCase();
+}
+
+function get_searchurl(term) {
+	var url = stripTrailingSlash(baseURL);
+	url = baseURL + '/search.php?q=' + term;
+
+	return url.toLowerCase();
+}
+
+function get_originurl(origin) {
+	url = baseURL + '/names/origin/' + decodeUrl(origin);
+	return url.toLowerCase();
+}
+
+
+var isBottomMenu = false;
+function openBottomMenu(btn) {
+
+	if (!isBottomMenu) {
+		$('#bottom-menu').height(400);
+		isBottomMenu = true;
+
+	} else if (isBottomMenu) {
+		$('#bottom-menu').height(0);
+		isBottomMenu = false;
+
+	}
+
+	return false;
+}
+
+/************************************ Helpers *************************/
+
+var buildResultsPage = function (term) {
+	if (term.length >= 1) {
+
+		url = get_searchurl(term);
+		if (typeof (history.pushState) != "undefined") {
+			var obj = {
+				Page: 'page',
+				Url: url
+			};
+			history.pushState(obj, obj.Page, obj.Url);
+		}
+		$('.overlay').show();
+		$.getJSON(baseURL + "/controls/searchAdopter.php?t=page&s=" + term, function (data) {
+			var items = [];
+			var terms = [];
+			if (data) {
+				$.each(data.results, function (key, val) {
+
+					var obj = getPageRow(val);
+					items.push(obj);
+				});
+
+				$.each(data.terms, function (key, val) {
+					terms.push(getSearchRow(val));
+				});
+
+				if (items.length > 0)
+					buildListing(items);
+				else
+					showNoResult();
+
+				getTagCloud('#tagcloud');
+				if (terms.length > 0)
+					buildTerms(terms, term);
+			}
+
+			$('.overlay').hide();
+		});
+	}
+}
+
+var getPageRow = function (val) {
+
+	if (val) {
+		return $([
+			"	<li class='item'>",
+			"	<a href='" + get_nameurl(val.name) + "' class='title'> " + val.name + "</a>",
+			"	<span class='pro text-light'>" + getPronounce(val) + getGenderSymbol(val) + "</span>",
+			"	  <div class='meaning'>" + val.computedmeaning + "</div>",
+			"	  <div class='similar'>",
+			"			" + getSimilar(val),
+			"		 " + getOrigin(val),
+			"	  </div>",
+			"	</li>"
+		].join("\n"));
+	}
+}
+
+var getInitialSideBar = function () {
+
+	return $([
+		" <div class='col-sm-4 col-xs-12 m-t-10 sidebar'>",
+		"	<div class='clearfix'></div>",
+		"	<div id='tagcloud'></div>",
+		"  </div>"
+	].join(""));
+}
+
+var getSearchRow = function (val) {
+
+	if (val) {
+		return $([
+			"	<li> <a href='" + get_searchurl(val.word) + "'>" + val.word + " </a></li>"
+		].join("\n"));
+	}
+}
+
+var buildTerms = function (terms, searchterm) {
+
+	var html = '';
+	$.each(terms, function (i, v) {
+		html += $(v).wrap('<li>').parent().html();
+	});
+
+
+	var termHtml = [
+		"<hr>",
+		"	<h4>Searches related to " + searchterm + "</h4>",
+		"		<ul  class='recent-searches'>",
+		html,
+		"		</ul>",
+	].join("");
+
+	if ($('ul.listing').length == 0) {
+		$(termHtml).insertAfter($('.listing'));
+	} else {
+		$('.listing').append(termHtml);
+	}
+
+	/*
+	$('.listing').append([
+	"<hr>",
+	"	<h4>Searches related to " +searchterm+"</h4>",
+	"		<ul  class='recent-searches'>",
+	html,
+	"		</ul>",
+	].join(""));*/
+}
+
+var showNoResult = function () {
+
+	$('#home').html([
+		"<div class='container'>",
+		"<div class='overlay'></div>",
+		"<div class='row col-sm-8 col-xs-12'>",
+		"	<div class='alert alert-warning m-t-30'>",
+		"		  <strong>Oppss!</strong> Indicates no name found.",
+		"	</div>",
+		"    <div class='clearfix'></div>",
+		"    <h3 class='mutted'>No Name Found ?</h3>",
+		"    <p>Still can''t find that perfect name? Use our random name finder to get some sweet name.",
+		"    <br> <br><a class='btn btn-success' href='" + baseURL + "/names/random'><span class='fa fa-random'></span> Randomizer</a> ",
+		"    </p>",
+		"    <br>",
+		" </div>",
+		" <div class='col-sm-4 col-xs-12 m-t-10 sidebar'>",
+		"	<div class='clearfix'></div>",
+		"	<div id='tagcloud'></div>",
+		"  </div>",
+		"</div>"
+	].join(""));
+
+}
+
+
+var buildListing = function (items) {
+
+	var html = '';
+	$.each(items, function (i, v) {
+		html += $(v).wrap('<li>').parent().html();
+	});
+
+	$('#home').html([
+		"<div class='container'>",
+		"<div class='overlay'></div>",
+		"	<div class='row col-sm-8 col-xs-12'>",
+		"		<ul  class='listing'>",
+		html,
+		"		</ul>",
+		"	</div>",
+		" <div class='col-sm-4 col-xs-12 m-t-10 sidebar'>",
+		"	<div class='clearfix'></div>",
+		"	<div id='tagcloud'></div>",
+		"  </div>",
+		"</div>"
+	].join(""));
+}
+
+var buildFavorits = function (id, name) {
+
+	if ($('#favlist').length == 0) {
+		$('.navbar-right').prepend(["<li id='favlist'> ",
+			"<div class='favorite  m-t-5'>",
+			"	<ul class='nav navbar-nav'>",
+			"		<li class='dropdown'>",
+			"  			<a href='#' class='dropdown-toggle' data-toggle='dropdown' id='favlist-outer' data-toggle='tooltip' title='Click button to see your favorite name list and send email to someone.' data-placement='bottom' data-container='body'><span class='fa fa-heart' ></span> Favorite</a>",
+			"			",
+			"  			<ul class='dropdown-menu'>",
+			"		 <li class='text-center'>",
+			"		 <a href='#' class='btn btn-success save-btn' id='save-favoritelist'>Save List</a></li>",
+			"			  <li>",
+			"				<a class='favorite' href='" + get_nameurl(name) + "'> " + name,
+			"					<span class='fa fa-trash pull-right' data-nameid='" + id + "'></span>",
+			"				</a>",
+			"			  </li>",
+			"        	</ul>",
+			"		</li>",
+			"	</ul>",
+			"</div>",
+			"</li>"
+		].join(""));
+
+		// if first element is added then page should scroll to top button "Add favorates"
+		/*$(window.opera ? 'html' : 'html, body').animate({
+			scrollTop: 0
+		}, 'slow');
+
+
+		$('#favlist-outer').tooltip({
+			tiggler: 'manual'
+		}).tooltip('show');
+		setTimeout(function () {
+			$('#favlist-outer').tooltip('disable');
+		}, 3000);*/
+
+
+	} else {
+
+		$('#favlist ul.dropdown-menu').append('<li class="divider"></li><li><a href="' + baseURL + '/names/' + name.toLowerCase() + '">' + name + '<span class="fa fa-trash pull-right" data-nameid="' + id + '"></span> </a></li>');
+	}
+}
+
+var getPronounce = function (val) {
+	if (val.pronunciation == null) return '';
+
+	return ' - ' + val.pronunciation.toLowerCase();
+}
+
+var getGender = function (val) {
+	if (val.pronunciation != 'null' && val.gender != 'undefined')
+		return val.gender;
+}
+
+var getGenderSymbol = function (val) {
+	if (val.pronunciation != 'null' && val.gender != 'undefined') {
+
+		if (val.gender.toLowerCase() == 'boy')
+			return " <i class='fa fa-mars'> </i>";
+
+		if (val.gender.toLowerCase() == 'girl')
+			return " <i class='fa fa-venus'> </i>";
+
+		if (val.gender.toLowerCase() == 'unisex')
+			return " <i class='fa fa-venus-mars'> </i>";
+
+		return '';
+	}
+}
+
+var getSimilar = function (val) {
+
+	var sv;
+
+	var s = (val.similar) ? $.parseJSON(val.similar) : null;
+	var v = (val.variants) ? $.parseJSON(val.variants) : null;
+	var limit = 15;
+
+	sv = (typeof s === null) ? $.extend(v, s) : $.extend(s, v);
+
+	if (!$.isEmptyObject(sv)) {
+		var similar = [];
+		$.each(sv, function (i, v) {
+			similar.push("<a href='" + get_nameurl(v) + "'>" + v + "</a>");
+
+			//if(i == limit) return false;
+		});
+
+		return 'similar: ' + similar.join(', ');
+	} else return '';
+}
+
+var getOrigin = function (val) {
+	if (val.origin != null && val.origin != 'undefined') {
+		var html = [];
+		var arraySplitByComma = val.origin.split(',');
+		$.each(arraySplitByComma, function (i, currentValue) {
+			var value = $.trim(currentValue);
+			if (value.indexOf("/") >= 0) {
+				var arraySplitBySlash = val.origin.split('/');
+				$.each(arraySplitBySlash, function (i, currentV) {
+					var value = $.trim(currentV);
+					html.push("<a href='" + get_originurl(value) + "'>" + value + "</a>");
+				});
+			} else {
+				html.push("<a href='" + get_originurl(value) + "'>" + value + "</a>");
+			}
+		});
+
+		return "  origin: " + html.join(', ');
+	} else return '';
+}
+
+var xhr;
+var getRandom = function () {
+
+	var gender = $('#filter-gender').val();
+	var religion = $('#filter-religion').val();
+	gender = gender != 'Gender' ? gender : '';
+	religion = religion != 'Religion' ? religion : '';
+	/*
+	if(xhr && xhr.readyState != 4){
+	xhr.abort();
+	}
+	*/
+	$('.random h1').html("<div class='loading'><img src='../images/loader.gif'/></div>");
+
+	$('.random .desc i').html('We are loading next random name ...');
+
+	var now = new Date();
+	$.ajax({
+		cache: false,
+		url: baseURL + "/controls/searchAdopter.php?t=rand&g=" + gender + "&r=" + religion + "&_=" + now.getTime(),
+		dataType: "json",
+		success: function (data) {
+			if (data) {
+				if (data.name) {
+
+					$('.random h1').html('<a href="' + get_nameurl(data.name) + '">' + data.name + '</a>');
+					$('.random .desc i').html(data.computedmeaning);
+					$('#shareinputval').val(get_nameurl(data.name));
+				}
+			} else {
+				$('.random h1').html('Nothing Found :(');
+				$('.random .desc i').html('<span class="random-notfound">Please rest your filters and try again.</span>');
+			}
+		}
+	});
+
+}
+
+
+var getTagCloud = function (control) {
+
+	$.get(baseURL + "/controls/widgets/tagcloudforajax.php", function (data) {
+		$(control).html(data);
+	});
+
+}
+
+var loadQuickPopup = function () {
+
+	$('#quicklistpopup .tab-content').load(baseURL + '/controls/lazyloaders/quickpoupcontents.php');
+}
+
+var loadAllOrigins = function () {
+	$('.originslist-lazyload').load(baseURL + '/controls/lazyloaders/allorigins.php');
+
+}
+/*===================  Other Events ============================*/
+
+$(document).ready(function (e) {
+	if (typeof startsWith !== "undefined" && startsWith) {
+		$('.start-with select').val(startsWith.toLowerCase());
+	}
+
+	$('.top-gender-bar .btn').removeClass('active');
+
+	if (typeof gender !== "undefined" && gender) {
+		$('.top-gender-bar .btn#' + gender).addClass('active');
+	} else {
+		$('.top-gender-bar .btn#all').addClass('active');
+	}
+});
+
+
+$(document).delegate('#favlist-outer', 'click', function (e) {
+	$(this).tooltip('disable');
+});
+
+/*
+$(document).delegate('.start-with select', 'change', function(e) {
+s = $(this).val();
+startsWith = s;
+var g = gender;
+
+buildListingUrl(s, g);
+});
+
+$('.start-letters a').click(function(e){
+
+e.preventDefault();
+s = $(this).data('val');
+startsWith = s;
+var g = gender;
+
+buildListingUrl(s, g);
+
+});
+*/
+$(document).delegate('#speak-name', 'click', function () {
+
+	var xhr;
+	var active = false;
+	var url;
+
+	if ($('#audioPlayer').length > 0) {
+
+		// check if this is already called and audio player is already loaded.
+		var url = $('#audioPlayer').attr('src');
+		if (url != '') {
+			speakit(url);
+			return false;
+		}
+	}
+
+	var speakButton = $(this);
+	speakButton.prop('disabled', true);
+	speakButton.html('<img src="../images/loader-green.gif" />');
+
+	url = baseURL + '/controls/speakAdopter.php?name=' + $(this).data('name');
+
+	if (active) {
+		console.log("killing active");
+		xhr.abort();
+	}
+	active = true;
+
+	$.get(url, function (data, status) {
+		var url = baseURL + data.replace('..', '');
+		speakit(url);
+		active = false;
+
+	}).always(function () {
+		active = false;
+		speakButton.prop('disabled', false);
+		speakButton.html('<i class="fa fa-volume-up"></i>');
+	});
+});
+
+
+$(document).delegate('button.btn.speaker', 'click', function () {
+	var key = $(this).data('name');
+	var url = baseURL + '/data/pronounce/' + key.toLowerCase() + '/' + langs[key];
+	$('#audio-player').attr('src', url).trigger("play");
+
+});
+
+var speakit = function (url) {
+
+	if ($('#audioPlayer').length > 0) {
+		$('#audioPlayer').attr('src', url).trigger("play");
+	}
+}
+
+var buildListingUrl = function (startsWith, gender) {
+
+	if (gender.toLowerCase() == 'all')
+		window.location.href = baseURL + '/names/' + listingType;
+
+	var url = baseURL + '/names/' + listingType + '/' + listingQuery;
+	if (gender) {
+		if (gender.toLowerCase() != 'all')
+			url = url + '/' + gender;
+	}
+
+	if (startsWith) {
+		if (startsWith == 'all')
+			url = url;
+		else
+			url = url + '/' + startsWith.toLowerCase();
+	}
+
+	//console.log(url);
+	window.location.href = url;
+}
+
+var stickyContainer = function (anchorSelecter, containerSelecter, wrapperSelecter) {
+
+
+	var $anchor = $(anchorSelecter);
+	var $scroller = $(containerSelecter);
+	var $wrap = $(wrapperSelecter);
+
+	var move = function () {
+		var st = $(window).scrollTop();
+		var ot = $anchor.offset().top;
+		if (st > ot) {
+			$scroller.css({
+				position: "fixed",
+				top: "0px",
+				width: "inherit",
+				background: '#fff',
+				'z-index': '1000'
+			});
+			$wrap.css({
+				width: "356.66px"
+			});
+
+		} else {
+			if (st <= ot) {
+				$scroller.css({
+					position: "relative",
+					top: ""
+				});
+
+				$wrap.css({
+					width: "100%"
+				});
+			}
+		}
+	};
+	$(window).scroll(move);
+	move();
+}
+
+
+/***************************************** comments system ********************/
+$("#submitComment").click(function (e) {
+
+
+	$("#comment-message").css('display', 'none');
+	var comment = CKEditor.getData();
+
+	var valid = this.form.checkValidity();
+
+	if (valid == true) {
+
+		//gaTrack(this);
+		e.preventDefault();
+
+		if ($.trim(comment).length == 0) {
+			alert("Please add your comments.");
+			return false;
+		}
+
+		if (comment.length < 20) {
+			alert("Details are not enough, please explain few more words.");
+			return false;
+		}
+
+		CKEditor.updateElement();
+		var str = $("#frm-comment").serialize();
+		$('.overlay').removeClass('hidden');
+		$.ajax({
+			url: baseURL + "/controls/contribution/contributionadopter.php?t=set",
+			data: str,
+			type: 'post',
+			success: function (response) {
+
+				var res = JSON.parse(response);
+				if (res.status == true) {
+					$("#comment-message").css('display', 'inline-block').html(res.message);
+					$("#sendername").val("");
+					$("#comment").val("");
+					$("#comment-counter").css('color', '#6cc161');
+					grecaptcha.reset();
+
+					// refresh the page.
+					location.reload();
+
+				} else {
+					alert(res.message);
+					grecaptcha.reset();
+					$('.overlay').addClass('hidden');
+					return false;
+				}
+
+				$('.overlay').addClass('hidden');
+			}
+		});
+	}
+});
+
+$('.reply-comment').on('click', function (e) {
+	e.preventDefault();
+	animateToPoint($('.comment-form-container'), 10);
+
+});
+
+function animateToPoint(selector, margin) {
+
+	var top = $(selector).offset().top;
+	var t = eval(top - margin);
+	$(window.opera ? 'html' : 'html, body').animate({
+		scrollTop: t + 'px'
+	}, 1200, 'linear');
+}
+
+////////////////////////////////////////////// CKEditor /////////////////////
+/*
+
+$("#comment").on("change paste keyup", function (event) {
+	checkTextAreaMaxLength(this, event);
+});
+*/
+
+
+function checkTextAreaMaxLength(editor, e, maxLength) {
+
+	var text = editor.getData();
+	var textlen = editor.getData().length;
+
+	if (!checkSpecialKeys(e)) {
+		if (textlen > maxLength - 1) {
+
+			editor.setData(text.substring(0, maxLength));
+			return false;
+		}
+	}
+
+	alertLength = ((90 / 100) * maxLength)
+	if (textlen > alertLength) {
+		$("#comment-counter").css('color', '#e41146');
+	}
+
+	$("#comment-counter").html(maxLength - textlen);
+	return true;
+}
+
+
+function checkSpecialKeys(e) {
+	if (e.keyCode != 8 && e.keyCode != 46 && e.keyCode != 37 && e.keyCode != 38 && e.keyCode != 39 && e.keyCode != 40)
+		return false;
+	else
+		return true;
+}

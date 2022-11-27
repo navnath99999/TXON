@@ -1,0 +1,343 @@
+
+(function($) {
+     $.fn.doubleTap = function(doubleTapCallback) {
+         return this.each(function(){
+			var elm = this;
+			var lastTap = 0;
+			$(elm).bind('vmousedown', function (e) {
+                                var now = (new Date()).valueOf();
+				var diff = (now - lastTap);
+                                lastTap = now ;
+                                if (diff < 250) {
+									console.log('clickde');
+		                    if($.isFunction( doubleTapCallback ))
+		                    {
+		                       doubleTapCallback.call(elm);
+		                    }
+                                }      
+			});
+         });
+    }
+})(jQuery);
+
+function animateTo(selector, offset){
+	
+	offset = offset || 100;
+	$('html, body').animate({
+	   scrollTop: $(selector).offset().top - offset
+	 }, 1000);	
+}
+
+/************************************************/
+
+
+
+var __wallpaperCategoryid = '';
+var __wallpaperDevices = [];
+var __composer;
+var __wallpaperComponent;
+$('#gallery-modal').on('shown.bs.modal', function (e) {
+	
+ $('#check-mobile').prop('checked', true);
+ 	fetchGallery();
+});
+
+$(".gallery-selector .category-menu li a").click(function(){
+	$(".gallery-selector .btn:first-child").html($(this).text()+' <span class="caret"></span>');
+	
+	__wallpaperCategoryid = $(this).data('id');	
+	fetchGallery();
+});
+
+$(document).delegate('.device-types input[type=checkbox]', 'click', function(e) {
+	var me = $(this);
+	var deviceTypes = $('.device-types input[type=checkbox]');
+	$(deviceTypes).each(function(i, dt) {
+		if($(dt).attr('id') == $(me).attr('id')) {
+			$(dt).prop('checked', true);
+		}else{
+			$(dt).prop('checked', false);
+		}
+	});
+	
+	fetchGallery();
+});
+
+function fetchGallery(page, pagesize, isNextPage) {
+	
+	__wallpaperDevices = [];
+		var deviceTypes = $('.device-types input[type=checkbox]');
+		
+		$(deviceTypes).each(function(i, dt) {			
+			if($(dt).is(':checked')){			
+			__wallpaperDevices.push($(dt).attr('id'));
+			}
+		});
+		
+		if(!isNextPage){
+			$('#gallery').html('<h4 class="wai t-text">Wait fetching backgrounds...</h4>');	
+		}else{ 
+			$('.loading-overlay').show();
+		}
+
+	page = (!page) ? 1 : page;
+	pagesize = (!pagesize) ? 30 : pagesize;
+		
+	$.get(baseURL + "/controls/wallpaperAdopter.php?type=fetchgallery&categoryid="+__wallpaperCategoryid + "&selectDevices="+__wallpaperDevices+"&page="+page+"&size="+pagesize, function(data) {
+		
+		if(isNextPage == true){
+			//$('#gallery').find('.page-loader').remove();
+			$('#gallery').append(data);
+			$('.loading-overlay').hide();
+		}else{
+			$('#gallery').html(data);
+		}
+		
+		[].forEach.call(document.querySelectorAll('.image-outer > img[data-src]'),function(img) {
+			img.setAttribute('src', img.getAttribute('data-src'));
+			img.onload = function() {
+				img.removeAttribute('data-src');
+				$(img).removeClass('img-gallery-loading');
+			};
+		});			
+	});	
+}
+
+function updateWallpaper(id) {
+	
+	$.get(baseURL + "/controls/wallpaperAdopter.php?type=updatewallpaperbits&wallpaperid="+id, function(data) {
+		// 
+	});	
+}
+
+$(document).delegate('.image-item', 'click', function(){
+	
+	var img = $(this).find('img');	
+	
+	var pic_real_width;
+	var pic_real_height;	
+	var imageUrl = $(img).data('image');
+	var imageId = $(img).data('id');
+	var categoryId = $(img).data('categoryid');
+	
+	initComposer(imageUrl, true);
+	$('#gallery-modal').modal('hide');
+	updateWallpaper(imageId);
+});
+
+function initComposer(url, isBgChange) {
+	
+	isBgChange = isBgChange || false;
+	__composer = $('#composer');
+	__wallpaperComponent = $('#wallpaper-component');
+	
+	var overlay = __wallpaperComponent.find('.overlay');
+	$(overlay).show();
+	var img = __composer.find('#composer-bg').attr('src', url+'?'+Math.random())
+	.load(function() {
+        pic_real_width = this.width;
+        pic_real_height = this.height;
+		
+		var size = {
+			width: pic_real_width +'px',
+			height: pic_real_height +'px',
+		};
+		
+		__composer.css(size);
+		__wallpaperComponent.css({ 'width' : size.width });
+		
+		if(!isBgChange){			
+			fixTextLocation(pic_real_width, pic_real_height);
+		}
+		
+		$.cookie('namebg-url',  url, { expires: 30, path: '/' , domain: 'kidpaw.com'});
+		$(overlay).hide();
+    });
+}
+
+function fixTextLocation(picWidth, picHeight) {
+	
+	var textBox = __composer.find('.name-text');
+	var tvc, thc;	
+	tvc = $(textBox).width()/2;
+	thc = $(textBox).height()/2;	
+	$(textBox).css({'left' : eval(picWidth/2 - tvc)+'px', 'bottom' : eval(picHeight/2-thc) + 'px'});
+}
+/*****************************************************************/
+
+
+$(document).ready(function () {
+	
+	$('.name-text').draggable({ containment: "parent" });	
+	var initbg = $.cookie('namebg-url');
+	if(!initbg) {
+		initbg = $('#initbg').val();
+	}
+	
+	initComposer(initbg);
+});
+
+$('#btn-download').on('click', function (e) {
+	
+	e.preventDefault();
+	var me = $(this);
+	$(me).prop('disabled', true);
+	
+	$(me).find('.fa').removeClass('fa-download').addClass('fa-spinner');	
+	html2canvas(document.querySelector('#composer')).then(function (canvas) {
+		
+		var text = $('.name-text').text();
+		saveAs(canvas.toDataURL(), 'kidpaw_'+decodeUrl(text.toLowerCase())+'_'+uniqueID()+'.png');
+		$(me).find('.fa').removeClass('fa-spinner').addClass('fa-download');
+		$(me).prop('disabled', false);
+	});
+
+});
+
+function saveAs(uri, filename) {
+
+	var link = document.createElement('a');
+
+	if (typeof link.download === 'string') {
+
+		link.href = uri;
+		link.download = filename;
+
+		//Firefox requires the link to be in the body
+		document.body.appendChild(link);
+
+		//simulate click
+		link.click();
+
+		//remove the link when done
+		document.body.removeChild(link);
+
+	} else {
+
+		window.open(uri);
+
+	}
+}
+
+$('.modal-body').scroll(function () {
+
+	if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+		var page = $('.page-loader:last').data('page');
+		var maxpages = $('.page-loader:last').data('maxpage');
+		var nextPage = eval(page) + 1;
+		var pagesize = 30;
+		var isNextPage = true;
+		if(nextPage > maxpages) return false;
+		fetchGallery(nextPage, pagesize, isNextPage);
+	}
+});
+
+
+/****************** slider **************************/
+ var initSlider = function(sliderId, sliderOptions){
+	 
+		 var slider = new $JssorSlider$(sliderId, sliderOptions);
+		 
+		 /*#region responsive code begin*/
+		 var MAX_WIDTH = 980;
+		 
+		 function ScaleSlider() {
+			 
+			 var containerElement = slider.$Elmt.parentNode;
+			 var containerWidth = containerElement.clientWidth;
+			 
+			 if (containerWidth) {
+				 var expectedWidth = Math.min(MAX_WIDTH || containerWidth, containerWidth);
+				 slider.$ScaleWidth(expectedWidth);
+			 } else {
+				 window.setTimeout(ScaleSlider, 30);
+				 }
+		}
+		
+		ScaleSlider();
+		$Jssor$.$AddEvent(window, "load", ScaleSlider);
+		$Jssor$.$AddEvent(window, "resize", ScaleSlider);
+		$Jssor$.$AddEvent(window, "orientationchange", ScaleSlider);
+		/*#endregion responsive code end*/
+};
+
+$('#touch-slider-colors .colorbox').on('click', function(e) {
+	e.stopPropagation();
+	var color = $(this).data('color');
+	
+	$('#touch-slider-colors .colorbox').each(function(index, element) {
+        $(element).find('.overlay').remove();
+    });
+	
+	$(this).append('<div class="overlay"><i class="fa fa-check-circle"></i></div>');
+	
+	$('.name-text').css({'color' : color });
+});
+
+
+$('#touch-slider-fonts .fontbox').on('click', function(e) {
+	e.stopPropagation();
+	var font = $(this).data('font');
+	
+	$('#touch-slider-fonts .fontbox').each(function(index, element) {
+        $(element).find('.overlay').remove();
+    });
+	
+	$(this).append('<div class="overlay"><i class="fa fa-check-circle"></i></div>');
+	
+	$('.name-text').css({'font-family' : font });
+});
+
+$(".doubleTap").doubleTap(function(){
+	$('#gallery-modal').modal();
+  });
+  
+$(".doubleTap").on('dblclick', function(){
+	$('#gallery-modal').modal();
+  });
+
+$('body').delegate('[contenteditable=true]','focus',function(){
+    $(this).parents('[draggable=true]')
+            .attr('data-draggableDisabled',1)
+            .removeAttr('draggable');
+    $(this).blur(function(){
+        $(this).parents('[data-draggableDisabled="1"]')
+                .attr('draggable','true')
+                .removeAttr('data-draggableDisabled');
+    });
+});
+
+
+$('#btn-edit, #composer-bg').on('click', function(){	
+
+	$('#edit-controls').toggleClass('close');
+	/*
+	var isClosed = $('#edit-controls').hasClass('close');
+	
+	var viewPort = $(document).width();
+	if(isClosed == false){
+		var offset = 550;
+	if(viewPort <= 767){
+		offset = 300;
+	}
+		
+	animateTo('#edit-controls', offset);
+	}
+	*/
+});
+
+function bindFontSizeSlider (fontContainer) {
+	
+	var slider = document.getElementById("font-size");
+	$(fontContainer).css({ 'font-size': slider.value + 'px' });
+	slider.oninput = function() {
+    	$(fontContainer).css({ 'font-size': this.value + 'px' });
+	}
+}
+
+var uniqueID = function () {
+  // Math.random should be unique because of its seeding algorithm.
+  // Convert it to base 36 (numbers + letters), and grab the first 9 characters
+  // after the decimal.
+  return '_' + Math.random().toString(36).substr(2, 9);
+};
